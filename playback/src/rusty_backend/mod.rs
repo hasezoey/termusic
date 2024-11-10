@@ -4,15 +4,14 @@ mod icy_metadata;
 // #[allow(unused)]
 // mod sink;
 
-pub mod decoder;
-// pub mod source;
+mod decoder;
+// mod source;
 
 use async_trait::async_trait;
-pub use cpal::traits::StreamTrait;
-pub use decoder::Symphonia;
-pub use rodio::OutputStream;
-pub use rodio::Sink;
-pub use rodio::Source;
+use decoder::Symphonia;
+use rodio::OutputStream;
+use rodio::Sink;
+use rodio::Source;
 use std::num::{NonZeroU16, NonZeroUsize};
 use termusiclib::config::ServerOverlay;
 use tokio::runtime::Handle;
@@ -72,7 +71,7 @@ pub enum PlayerInternalCmd {
     TogglePause,
     Volume(u16),
     Eos,
-    CheckProgress
+    CheckProgress,
 }
 pub struct RustyBackend {
     volume: Arc<AtomicU16>,
@@ -433,17 +432,15 @@ async fn player_thread(
 
     let clone_tx = picmd_tx.clone();
     std::thread::Builder::new()
-            .name("playback progress ticker".into())
-            .spawn(move || {
-                loop {
-                    std::thread::sleep(Duration::from_millis(500));
+        .name("playback progress ticker".into())
+        .spawn(move || loop {
+            std::thread::sleep(Duration::from_millis(500));
 
-                    if let Err(_) = clone_tx.send(PlayerInternalCmd::CheckProgress) {
-                        break;
-                    }
-                }
-            })
-            .expect("failed to spawn thread");
+            if let Err(_) = clone_tx.send(PlayerInternalCmd::CheckProgress) {
+                break;
+            }
+        })
+        .expect("failed to spawn thread");
 
     loop {
         let Ok(cmd) = picmd_rx.recv() else {
