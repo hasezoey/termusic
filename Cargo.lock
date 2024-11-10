@@ -4616,7 +4616,6 @@ dependencies = [
  "async-channel",
  "async-trait",
  "base64",
- "cpal",
  "discord-rich-presence",
  "glib",
  "gstreamer",
