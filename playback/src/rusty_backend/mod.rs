@@ -72,6 +72,7 @@ pub enum PlayerInternalCmd {
     TogglePause,
     Volume(u16),
     Eos,
+    CheckProgress
 }
 pub struct RustyBackend {
     volume: Arc<AtomicU16>,
@@ -429,6 +430,21 @@ async fn player_thread(
     let mut sink = Sink::try_new(&handle /* , picmd_tx.clone(), pcmd_tx.clone() */).unwrap();
     sink.set_speed(speed_inside as f32 / 10.0);
     sink.set_volume(f32::from(volume_inside.load(Ordering::SeqCst)) / 100.0);
+
+    let clone_tx = picmd_tx.clone();
+    std::thread::Builder::new()
+            .name("playback progress ticker".into())
+            .spawn(move || {
+                loop {
+                    std::thread::sleep(Duration::from_millis(500));
+
+                    if let Err(_) = clone_tx.send(PlayerInternalCmd::CheckProgress) {
+                        break;
+                    }
+                }
+            })
+            .expect("failed to spawn thread");
+
     loop {
         let Ok(cmd) = picmd_rx.recv() else {
             // only error can be a disconnect (no more senders)
@@ -507,6 +523,25 @@ async fn player_thread(
             }
             PlayerInternalCmd::Progress(new_position) => {
                 // let position = sink.elapsed().as_secs() as i64;
+                // error!("position in rusty backend is: {}", position);
+                *position.lock() = new_position;
+
+                // About to finish signal is a simulation of gstreamer, and used for gapless
+                if !is_radio {
+                    if let Some(d) = *total_duration.lock() {
+                        let progress = new_position.as_secs_f64() / d.as_secs_f64();
+                        if progress >= 0.5
+                            && d.saturating_sub(new_position) < Duration::from_secs(2)
+                        {
+                            if let Err(e) = pcmd_tx.send(PlayerCmd::AboutToFinish) {
+                                error!("command AboutToFinish sent failed: {e}");
+                            }
+                        }
+                    }
+                }
+            }
+            PlayerInternalCmd::CheckProgress => {
+                let new_position: Duration = sink.get_pos();
                 // error!("position in rusty backend is: {}", position);
                 *position.lock() = new_position;
 
