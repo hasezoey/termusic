@@ -71,7 +71,6 @@ pub enum PlayerInternalCmd {
     TogglePause,
     Volume(u16),
     Eos,
-    CheckProgress,
 }
 pub struct RustyBackend {
     volume: Arc<AtomicU16>,
@@ -255,19 +254,35 @@ impl PlayerTrait for RustyBackend {
     }
 }
 
+/// Add a way to get the progress from the source directly
+fn get_progress(
+    cmd_tx: Sender<PlayerInternalCmd>,
+    source: Symphonia,
+) -> rodio::source::PeriodicAccess<
+    rodio::source::TrackPosition<Symphonia>,
+    impl FnMut(&mut rodio::source::TrackPosition<Symphonia>),
+> {
+    source
+        .track_position()
+        .periodic_access(Duration::from_millis(500), move |src| {
+            cmd_tx.send(PlayerInternalCmd::Progress(src.get_pos())).ok();
+        })
+}
+
 /// Append the `media_source` to the `sink`, while allowing different functions to run with `func` with a [`MediaTitleRx`]
 fn append_to_sink_inner_media_title<F: FnOnce(&mut Symphonia, MediaTitleRx)>(
     media_source: Box<dyn MediaSource>,
     trace: &str,
     sink: &Sink,
     gapless: bool,
+    cmd_tx: Sender<PlayerInternalCmd>,
     func: F,
 ) {
     let mss = MediaSourceStream::new(media_source, MediaSourceStreamOptions::default());
     match Symphonia::new_with_media_title(mss, gapless) {
         Ok((mut decoder, rx)) => {
             func(&mut decoder, rx);
-            sink.append(decoder);
+            sink.append(get_progress(cmd_tx, decoder));
         }
         Err(e) => error!("error decoding '{trace}' is: {e:?}"),
     }
@@ -279,13 +294,14 @@ fn append_to_sink_inner<F: FnOnce(&mut Symphonia)>(
     trace: &str,
     sink: &Sink,
     gapless: bool,
+    cmd_tx: Sender<PlayerInternalCmd>,
     func: F,
 ) {
     let mss = MediaSourceStream::new(media_source, MediaSourceStreamOptions::default());
     match Symphonia::new(mss, gapless) {
         Ok(mut decoder) => {
             func(&mut decoder);
-            sink.append(decoder);
+            sink.append(get_progress(cmd_tx, decoder));
         }
         Err(e) => error!("error decoding '{trace}' is: {e:?}"),
     }
@@ -301,12 +317,14 @@ fn append_to_sink<MT: Fn(MediaTitleType) + Send + 'static>(
     gapless: bool,
     total_duration_local: &ArcTotalDuration,
     media_title_fn: MT,
+    cmd_tx: Sender<PlayerInternalCmd>,
 ) {
     append_to_sink_inner_media_title(
         media_source,
         trace,
         sink,
         gapless,
+        cmd_tx,
         |decoder, mut media_title_rx| {
             std::mem::swap(
                 &mut *total_duration_local.lock(),
@@ -331,8 +349,9 @@ fn append_to_sink_no_duration(
     sink: &Sink,
     gapless: bool,
     total_duration_local: &ArcTotalDuration,
+    cmd_tx: Sender<PlayerInternalCmd>,
 ) {
-    append_to_sink_inner(media_source, trace, sink, gapless, |_| {
+    append_to_sink_inner(media_source, trace, sink, gapless, cmd_tx, |_| {
         // remove old stale duration
         total_duration_local.lock().take();
     });
@@ -351,12 +370,14 @@ fn append_to_sink_queue<MT: Fn(MediaTitleType) + Send + 'static>(
     // total_duration_local: &ArcTotalDuration,
     next_duration_opt: &mut Option<Duration>,
     media_title_fn: MT,
+    cmd_tx: Sender<PlayerInternalCmd>,
 ) {
     append_to_sink_inner_media_title(
         media_source,
         trace,
         sink,
         gapless,
+        cmd_tx,
         |decoder, mut media_title_rx| {
             std::mem::swap(next_duration_opt, &mut decoder.total_duration());
             // rely on EOS message to set next duration
@@ -383,8 +404,9 @@ fn append_to_sink_queue_no_duration(
     gapless: bool,
     // total_duration_local: &ArcTotalDuration,
     next_duration_opt: &mut Option<Duration>,
+    cmd_tx: Sender<PlayerInternalCmd>,
 ) {
-    append_to_sink_inner(media_source, trace, sink, gapless, |_| {
+    append_to_sink_inner(media_source, trace, sink, gapless, cmd_tx, |_| {
         // remove potential old stale duration
         next_duration_opt.take();
         // rely on EOS message to set next duration
@@ -430,18 +452,6 @@ async fn player_thread(
     sink.set_speed(speed_inside as f32 / 10.0);
     sink.set_volume(f32::from(volume_inside.load(Ordering::SeqCst)) / 100.0);
 
-    let clone_tx = picmd_tx.clone();
-    std::thread::Builder::new()
-        .name("playback progress ticker".into())
-        .spawn(move || loop {
-            std::thread::sleep(Duration::from_millis(500));
-
-            if let Err(_) = clone_tx.send(PlayerInternalCmd::CheckProgress) {
-                break;
-            }
-        })
-        .expect("failed to spawn thread");
-
     loop {
         let Ok(cmd) = picmd_rx.recv() else {
             // only error can be a disconnect (no more senders)
@@ -460,6 +470,7 @@ async fn player_thread(
                     &media_title,
                     // &radio_downloaded,
                     false,
+                    picmd_tx.clone(),
                 )
                 .await
                 {
@@ -484,6 +495,7 @@ async fn player_thread(
                     &media_title,
                     // &radio_downloaded,
                     true,
+                    picmd_tx.clone(),
                 )
                 .await
                 {
@@ -520,25 +532,6 @@ async fn player_thread(
             }
             PlayerInternalCmd::Progress(new_position) => {
                 // let position = sink.elapsed().as_secs() as i64;
-                // error!("position in rusty backend is: {}", position);
-                *position.lock() = new_position;
-
-                // About to finish signal is a simulation of gstreamer, and used for gapless
-                if !is_radio {
-                    if let Some(d) = *total_duration.lock() {
-                        let progress = new_position.as_secs_f64() / d.as_secs_f64();
-                        if progress >= 0.5
-                            && d.saturating_sub(new_position) < Duration::from_secs(2)
-                        {
-                            if let Err(e) = pcmd_tx.send(PlayerCmd::AboutToFinish) {
-                                error!("command AboutToFinish sent failed: {e}");
-                            }
-                        }
-                    }
-                }
-            }
-            PlayerInternalCmd::CheckProgress => {
-                let new_position: Duration = sink.get_pos();
                 // error!("position in rusty backend is: {}", position);
                 *position.lock() = new_position;
 
@@ -612,6 +605,7 @@ async fn queue_next(
     next_duration_opt: &mut Option<Duration>,
     media_title: &Arc<Mutex<String>>,
     enqueue: bool,
+    cmd_tx: Sender<PlayerInternalCmd>,
 ) -> Result<()> {
     let media_type = &track.media_type;
     let file_path = track
@@ -631,6 +625,7 @@ async fn queue_next(
                     gapless,
                     next_duration_opt,
                     common_media_title_cb(media_title.clone()),
+                    cmd_tx,
                 );
             } else {
                 append_to_sink(
@@ -640,6 +635,7 @@ async fn queue_next(
                     gapless,
                     total_duration,
                     common_media_title_cb(media_title.clone()),
+                    cmd_tx,
                 );
             }
 
@@ -659,6 +655,7 @@ async fn queue_next(
                         gapless,
                         next_duration_opt,
                         common_media_title_cb(media_title.clone()),
+                        cmd_tx,
                     );
                 } else {
                     append_to_sink(
@@ -668,6 +665,7 @@ async fn queue_next(
                         gapless,
                         total_duration,
                         common_media_title_cb(media_title.clone()),
+                        cmd_tx,
                     );
                 }
                 return Ok(());
@@ -695,6 +693,7 @@ async fn queue_next(
                     gapless,
                     next_duration_opt,
                     common_media_title_cb(media_title.clone()),
+                    cmd_tx,
                 );
             } else {
                 append_to_sink(
@@ -704,6 +703,7 @@ async fn queue_next(
                     gapless,
                     total_duration,
                     common_media_title_cb(media_title.clone()),
+                    cmd_tx,
                 );
             }
             Ok(())
@@ -777,9 +777,17 @@ async fn queue_next(
                     sink,
                     gapless,
                     next_duration_opt,
+                    cmd_tx,
                 );
             } else {
-                append_to_sink_no_duration(media_source, &url, sink, gapless, total_duration);
+                append_to_sink_no_duration(
+                    media_source,
+                    &url,
+                    sink,
+                    gapless,
+                    total_duration,
+                    cmd_tx,
+                );
             }
 
             Ok(())
