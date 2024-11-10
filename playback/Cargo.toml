@@ -41,6 +41,7 @@ soundtouch = { workspace = true, optional = true }
 souvlaki.workspace = true
 stream-download = { workspace = true }
 symphonia = { workspace = true }
+rodio.workspace = true
 tokio.workspace = true
 # soundtouch= { git = 'https://github.com/Drewol/soundtouch-rs.git' }
 

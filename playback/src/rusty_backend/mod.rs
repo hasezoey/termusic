@@ -2,24 +2,24 @@
 
 mod conversions;
 mod icy_metadata;
-#[allow(unused)]
-mod sink;
-mod stream;
+// #[allow(unused)]
+// mod sink;
+// mod stream;
 
-pub mod buffer;
+// pub mod buffer;
 pub mod decoder;
-pub mod dynamic_mixer;
-pub mod queue;
-pub mod source;
+// pub mod dynamic_mixer;
+// pub mod queue;
+// pub mod source;
 
 use async_trait::async_trait;
-pub use conversions::Sample;
+// pub use conversions::Sample;
 pub use cpal::{traits::StreamTrait, ChannelCount, SampleRate};
 pub use decoder::Symphonia;
-pub use sink::Sink;
-pub use source::Source;
+pub use rodio::Sink;
+pub use rodio::Source;
 use std::num::{NonZeroU16, NonZeroUsize};
-pub use stream::OutputStream;
+pub use rodio::OutputStream;
 use termusiclib::config::ServerOverlay;
 use tokio::runtime::Handle;
 
@@ -366,7 +366,7 @@ fn append_to_sink_queue<MT: Fn(MediaTitleType) + Send + 'static>(
         |decoder, mut media_title_rx| {
             std::mem::swap(next_duration_opt, &mut decoder.total_duration());
             // rely on EOS message to set next duration
-            sink.message_on_end();
+            // sink.message_on_end();
 
             let handle = Handle::current();
 
@@ -394,7 +394,7 @@ fn append_to_sink_queue_no_duration(
         // remove potential old stale duration
         next_duration_opt.take();
         // rely on EOS message to set next duration
-        sink.message_on_end();
+        // sink.message_on_end();
     });
 }
 
@@ -432,7 +432,7 @@ async fn player_thread(
     // note that the current implementation is only meant to have 1 enqueued next after the current playing song
     let mut next_duration_opt = None;
     let (_stream, handle) = OutputStream::try_default().unwrap();
-    let mut sink = Sink::try_new(&handle, picmd_tx.clone(), pcmd_tx.clone()).unwrap();
+    let mut sink = Sink::try_new(&handle/* , picmd_tx.clone(), pcmd_tx.clone() */).unwrap();
     sink.set_speed(speed_inside as f32 / 10.0);
     sink.set_volume(f32::from(volume_inside.load(Ordering::SeqCst)) / 100.0);
     loop {
@@ -460,7 +460,11 @@ async fn player_thread(
                 }
             }
             PlayerInternalCmd::TogglePause => {
-                sink.toggle_playback();
+                if sink.is_paused() {
+                    sink.play();
+                } else {
+                    sink.pause();
+                }
             }
             PlayerInternalCmd::QueueNext(track, gapless) => {
                 if let Err(err) = queue_next(
@@ -487,7 +491,7 @@ async fn player_thread(
                 sink.set_speed(speed_inside as f32 / 10.0);
             }
             PlayerInternalCmd::Stop => {
-                sink = Sink::try_new(&handle, picmd_tx.clone(), pcmd_tx.clone()).unwrap();
+                sink = Sink::try_new(&handle/* , picmd_tx.clone(), pcmd_tx.clone() */).unwrap();
                 sink.set_speed(speed_inside as f32 / 10.0);
                 sink.set_volume(f32::from(volume_inside.load(Ordering::SeqCst)) / 100.0);
             }
@@ -527,10 +531,10 @@ async fn player_thread(
                 }
             }
             PlayerInternalCmd::SeekAbsolute(position) => {
-                sink.seek(position);
+                let _ = sink.try_seek(position);
             }
             PlayerInternalCmd::MessageOnEnd => {
-                sink.message_on_end();
+                // sink.message_on_end();
             }
 
             PlayerInternalCmd::SeekRelative(offset) => {
@@ -539,18 +543,18 @@ async fn player_thread(
                     sink.set_volume(0.0);
                 }
                 if offset.is_positive() {
-                    let new_pos = sink.elapsed().as_secs() + offset as u64;
+                    let new_pos = sink.get_pos().as_secs() + offset as u64;
                     if let Some(d) = *total_duration.lock() {
                         if new_pos < d.as_secs() - offset as u64 {
-                            sink.seek(Duration::from_secs(new_pos));
+                            let _ = sink.try_seek(Duration::from_secs(new_pos));
                         }
                     }
                 } else {
                     let new_pos = sink
-                        .elapsed()
+                        .get_pos()
                         .as_secs()
                         .saturating_sub(offset.unsigned_abs());
-                    sink.seek(Duration::from_secs(new_pos));
+                    let _ = sink.try_seek(Duration::from_secs(new_pos));
                 }
                 if paused {
                     std::thread::sleep(std::time::Duration::from_millis(50));
