@@ -1,25 +1,19 @@
 #![cfg_attr(test, deny(missing_docs))]
 
-mod conversions;
 mod icy_metadata;
 // #[allow(unused)]
 // mod sink;
-// mod stream;
 
-// pub mod buffer;
 pub mod decoder;
-// pub mod dynamic_mixer;
-// pub mod queue;
 // pub mod source;
 
 use async_trait::async_trait;
-// pub use conversions::Sample;
-pub use cpal::{traits::StreamTrait, ChannelCount, SampleRate};
+pub use cpal::traits::StreamTrait;
 pub use decoder::Symphonia;
+pub use rodio::OutputStream;
 pub use rodio::Sink;
 pub use rodio::Source;
 use std::num::{NonZeroU16, NonZeroUsize};
-pub use rodio::OutputStream;
 use termusiclib::config::ServerOverlay;
 use tokio::runtime::Handle;
 
@@ -432,7 +426,7 @@ async fn player_thread(
     // note that the current implementation is only meant to have 1 enqueued next after the current playing song
     let mut next_duration_opt = None;
     let (_stream, handle) = OutputStream::try_default().unwrap();
-    let mut sink = Sink::try_new(&handle/* , picmd_tx.clone(), pcmd_tx.clone() */).unwrap();
+    let mut sink = Sink::try_new(&handle /* , picmd_tx.clone(), pcmd_tx.clone() */).unwrap();
     sink.set_speed(speed_inside as f32 / 10.0);
     sink.set_volume(f32::from(volume_inside.load(Ordering::SeqCst)) / 100.0);
     loop {
@@ -491,7 +485,7 @@ async fn player_thread(
                 sink.set_speed(speed_inside as f32 / 10.0);
             }
             PlayerInternalCmd::Stop => {
-                sink = Sink::try_new(&handle/* , picmd_tx.clone(), pcmd_tx.clone() */).unwrap();
+                sink = Sink::try_new(&handle /* , picmd_tx.clone(), pcmd_tx.clone() */).unwrap();
                 sink.set_speed(speed_inside as f32 / 10.0);
                 sink.set_volume(f32::from(volume_inside.load(Ordering::SeqCst)) / 100.0);
             }

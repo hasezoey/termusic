@@ -271,7 +271,7 @@ impl Source for Symphonia {
 
     #[inline]
     fn try_seek(&mut self, time: Duration) -> Result<(), rodio::source::SeekError> {
-            match self.probed.format.seek(
+        match self.probed.format.seek(
             SeekMode::Coarse,
             SeekTo::Time {
                 time: time.into(),
