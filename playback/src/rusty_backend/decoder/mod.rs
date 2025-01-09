@@ -5,17 +5,14 @@ use super::Source;
 use std::{fmt, num::NonZeroU64, time::Duration};
 use symphonia::{
     core::{
-        audio::{Audio, AudioBuffer, AudioSpec, GenericAudioBufferRef},
+        audio::{AudioSpec, GenericAudioBufferRef},
         codecs::{
             self,
             audio::{well_known::CODEC_ID_MP3, CODEC_ID_NULL_AUDIO},
             CodecParameters,
         },
         errors::Error,
-        formats::{
-            probe::{Hint, ProbeMetadataData},
-            FormatOptions, FormatReader, SeekMode, SeekTo, Track, TrackType,
-        },
+        formats::{probe::Hint, FormatOptions, FormatReader, SeekMode, SeekTo, Track, TrackType},
         io::MediaSourceStream,
         meta::{MetadataOptions, MetadataRevision, StandardTag},
         units::TimeBase,
@@ -25,10 +22,8 @@ use symphonia::{
 use tokio::sync::mpsc;
 
 fn is_codec_null(track: &Track) -> bool {
-    let audio_codec_params = match track.codec_params.as_ref() {
-        Some(CodecParameters::Audio(audio)) => audio,
-        // treat anything other than "Audio" as null codec
-        _ => return true,
+    let Some(CodecParameters::Audio(audio_codec_params)) = track.codec_params.as_ref() else {
+        return true;
     };
 
     audio_codec_params.codec == CODEC_ID_NULL_AUDIO
@@ -89,8 +84,7 @@ pub struct Symphonia {
     decoder: Box<dyn codecs::audio::AudioDecoder>,
     current_frame_offset: usize,
     probed: Box<dyn FormatReader>,
-    buffer: Vec<i16>,
-    buffer_frame_len: usize,
+    buffer: OurAudioBuffer,
     spec: AudioSpec,
     duration: Option<Duration>,
     elapsed: Duration,
@@ -172,9 +166,8 @@ impl Symphonia {
             return Ok(None);
         };
 
-        let audio_codec_params = match track.codec_params.as_ref() {
-            Some(CodecParameters::Audio(audio)) => audio,
-            _ => return Ok(None),
+        let Some(CodecParameters::Audio(audio_codec_params)) = track.codec_params.as_ref() else {
+            return Ok(None);
         };
 
         info!(
@@ -183,11 +176,11 @@ impl Symphonia {
         );
 
         let mut decoder = symphonia::default::get_codecs().make_audio_decoder(
-            &audio_codec_params,
+            audio_codec_params,
             &codecs::audio::AudioDecoderOptions { verify: true },
         )?;
 
-        let duration = Self::get_duration(&track);
+        let duration = Self::get_duration(track);
         let track_id = track.id;
         let time_base = track.time_base;
         let mut media_title_tx = MediaTitleTxWrap::new();
@@ -198,12 +191,11 @@ impl Symphonia {
             None
         };
 
-        // decode the first part, to get the spec and initial buffer
-        let mut buffer = None;
+        let mut buffer = OurAudioBuffer::new();
         let Some(DecodeLoopResult { spec, elapsed }) = decode_loop(
             &mut *probed,
             &mut *decoder,
-            BufferInputType::New(&mut buffer),
+            &mut buffer,
             track_id,
             time_base,
             &mut media_title_tx,
@@ -213,9 +205,6 @@ impl Symphonia {
         else {
             return Ok(None);
         };
-        // safe to unwrap because "decode_loop" ensures it will be set
-        let buffer = buffer.unwrap();
-        let (buffer, buffer_frame_len) = buffer;
         let elapsed = elapsed.unwrap_or_default();
 
         Ok(Some((
@@ -224,7 +213,6 @@ impl Symphonia {
                 current_frame_offset: 0,
                 probed,
                 buffer,
-                buffer_frame_len,
                 spec,
                 duration,
                 elapsed,
@@ -246,37 +234,12 @@ impl Symphonia {
             })
         })
     }
-
-    /// Copy passed [`GenericAudioBufferRef`] into a new [`AudioBuffer`]
-    ///
-    /// also see [`Self::maybe_reuse_buffer`]
-    #[inline]
-    fn get_buffer_new(decoded: GenericAudioBufferRef<'_>) -> (Vec<i16>, usize) {
-        let mut buffer = Vec::<i16>::with_capacity(decoded.capacity());
-        decoded.copy_to_vec_interleaved(&mut buffer);
-        (buffer, decoded.frames())
-    }
-
-    /// Copy passed [`GenericAudioBufferRef`] into the existing [`AudioBuffer`], if possible, otherwise create a new
-    #[inline]
-    fn maybe_reuse_buffer(buffer: (&mut Vec<i16>, &mut usize), decoded: GenericAudioBufferRef<'_>) {
-        // calculate what capacity the AudioBuffer will need (as per AudioBuffer internals)
-        let required_capacity = decoded.byte_len_as::<i16>();
-        // avoid a allocation if not actually necessary
-        // this also covers the case if the spec changed from the buffer and decoded
-        if required_capacity <= buffer.0.capacity() {
-            decoded.copy_to_vec_interleaved(buffer.0);
-            *buffer.1 = decoded.frames();
-        } else {
-            (*buffer.0, *buffer.1) = Self::get_buffer_new(decoded);
-        }
-    }
 }
 
 impl Source for Symphonia {
     #[inline]
     fn current_frame_len(&self) -> Option<usize> {
-        Some(self.buffer_frame_len)
+        Some(self.buffer.frame_len)
     }
 
     #[inline]
@@ -337,7 +300,7 @@ impl Iterator for Symphonia {
             let DecodeLoopResult { spec, elapsed } = decode_loop(
                 &mut *self.probed,
                 &mut *self.decoder,
-                BufferInputType::Existing((&mut self.buffer, &mut self.buffer_frame_len)),
+                &mut self.buffer,
                 self.track_id,
                 self.time_base,
                 &mut self.media_title_tx,
@@ -362,6 +325,54 @@ impl Iterator for Symphonia {
         self.current_frame_offset += 1;
 
         Some(sample)
+    }
+}
+
+/// Our implementation of a `SampleBuffer`, as it does not exist in Symphonia 0.6 anymore
+/// and `AudioBuffer` does not work for this case.
+#[derive(Debug, Clone, PartialEq)]
+struct OurAudioBuffer {
+    buf: Vec<i16>,
+    frame_len: usize,
+}
+
+impl OurAudioBuffer {
+    fn new() -> Self {
+        Self {
+            buf: Vec::new(),
+            frame_len: 0,
+        }
+    }
+
+    /// Copy passed [`GenericAudioBufferRef`] into our Buffer
+    #[inline]
+    fn copy_buffers(&mut self, decoded: &GenericAudioBufferRef<'_>) {
+        let required_capacity = decoded.byte_len_as::<i16>();
+        self.buf.resize(required_capacity, 0);
+
+        decoded.copy_to_vec_interleaved(&mut self.buf);
+        self.frame_len = decoded.frames();
+    }
+
+    /// Clears the buffer and frame length
+    fn clear(&mut self) {
+        self.buf.clear();
+        self.frame_len = 0;
+    }
+
+    /// Get if the inner buffer is empty
+    fn is_empty(&self) -> bool {
+        self.buf.is_empty()
+    }
+
+    /// Get the length of the buffer
+    fn len(&self) -> usize {
+        self.buf.len()
+    }
+
+    /// Get a value at the index
+    fn get(&self, index: usize) -> Option<&i16> {
+        self.buf.get(index)
     }
 }
 
@@ -409,31 +420,12 @@ struct DecodeLoopResult {
     elapsed: Option<Duration>,
 }
 
-// is there maybe a better option for this?
-enum BufferInputType<'a> {
-    /// Allocate a new [`Vec`] in the specified location (without unsafe)
-    New(&'a mut Option<(Vec<i16>, usize)>),
-    /// Try to re-use the provided [`Vec`]
-    Existing((&'a mut Vec<i16>, &'a mut usize)),
-}
-
-impl std::fmt::Debug for BufferInputType<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::New(_) => f.debug_tuple("New").finish(),
-            Self::Existing(_) => f.debug_tuple("Existing").finish(),
-        }
-    }
-}
-
 #[allow(clippy::too_many_arguments)]
 /// Decode until finding a valid packet and get the samples from it
-///
-/// If [`BufferInputType::New`] is used, it is guaranteed to be [`Some`] if function result is [`Ok`].
 fn decode_loop(
     format: &mut dyn FormatReader,
     decoder: &mut dyn codecs::audio::AudioDecoder,
-    buffer: BufferInputType<'_>,
+    buffer: &mut OurAudioBuffer,
     track_id: u32,
     time_base: Option<TimeBase>,
     media_title_tx: &mut MediaTitleTxWrap,
@@ -488,14 +480,7 @@ fn decode_loop(
 
     let spec = audio_buf.spec().clone();
 
-    match buffer {
-        BufferInputType::New(buffer) => {
-            *buffer = Some(Symphonia::get_buffer_new(audio_buf));
-        }
-        BufferInputType::Existing(buffer) => {
-            Symphonia::maybe_reuse_buffer(buffer, audio_buf);
-        }
-    }
+    buffer.copy_buffers(&audio_buf);
 
     Ok(Some(DecodeLoopResult { spec, elapsed }))
 }
@@ -543,7 +528,7 @@ fn do_inline_metdata(media_title_tx: &mut MediaTitleTxWrap, format: &mut dyn For
 }
 
 #[inline]
-fn find_title_metadata<'a>(metadata: &'a MetadataRevision) -> Option<&'a String> {
+fn find_title_metadata(metadata: &MetadataRevision) -> Option<&String> {
     let t = metadata.tags().iter().find_map(|v| {
         v.std.as_ref().and_then(|v| match v {
             StandardTag::TrackTitle(title) => Some(&**title),
