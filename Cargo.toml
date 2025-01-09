@@ -81,7 +81,7 @@ shellexpand = { version = "3.1", features = ["path"] }
 soundtouch = "0.4.2"
 souvlaki = { version = "0.7.3", default-features=false, features = ["use_zbus"] }
 stream-download = { version = "0.9.0", features = ["reqwest-rustls"] }
-symphonia = { version = "0.5.1", features = [
+symphonia = { path = "../Symphonia/symphonia", version = "0.5.1", features = [
     "aac",
     "mp3",
     "isomp4",
