@@ -910,13 +910,6 @@ impl Model {
         }
     }
 
-    // update other messages
-    pub fn update_outside_msg(&mut self) {
-        if let Ok(msg) = self.rx_to_main.try_recv() {
-            self.update(Some(msg));
-        }
-    }
-
     // change status bar text to indicate the downloading state
     fn update_download_msg(&mut self, msg: DLMsg) -> Option<Msg> {
         self.redraw = true;
