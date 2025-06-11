@@ -27,7 +27,7 @@ mod key_combo;
 mod update;
 mod view;
 
-use crate::ui::model::{ConfigEditorLayout, Model};
+use crate::ui::model::{ConfigEditorLayout, Model, UserEvent};
 
 use anyhow::Result;
 use termusiclib::config::{SharedTuiSettings, TuiOverlay};
@@ -35,7 +35,7 @@ use termusiclib::ids::{Id, IdConfigEditor};
 use termusiclib::types::{ConfigEditorMsg, Msg};
 use tui_realm_stdlib::{Radio, Span};
 use tuirealm::props::{Alignment, BorderSides, BorderType, Borders, Style, TextSpan};
-use tuirealm::{event::NoUserEvent, Component, Event, MockComponent};
+use tuirealm::{Component, Event, MockComponent};
 
 use super::popups::{YNConfirm, YNConfirmStyle};
 
@@ -71,8 +71,8 @@ impl CEHeader {
     }
 }
 
-impl Component<Msg, NoUserEvent> for CEHeader {
-    fn on(&mut self, _ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for CEHeader {
+    fn on(&mut self, _ev: Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
@@ -111,8 +111,8 @@ impl CEFooter {
     }
 }
 
-impl Component<Msg, NoUserEvent> for CEFooter {
-    fn on(&mut self, _ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for CEFooter {
+    fn on(&mut self, _ev: Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
@@ -137,8 +137,8 @@ impl ConfigSavePopup {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigSavePopup {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigSavePopup {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(
             ev,
             Msg::ConfigEditor(ConfigEditorMsg::ConfigSaveOk),

@@ -9,8 +9,8 @@ use termusiclib::ids::{Id, IdConfigEditor, IdTagEditor};
 use termusiclib::types::{DBMsg, Msg, PCMsg};
 use termusiclib::utils::get_parent_folder;
 use tokio::runtime::Handle;
+use tokio::sync::mpsc::UnboundedReceiver;
 use tui_realm_treeview::Tree;
-use tuirealm::event::NoUserEvent;
 use tuirealm::props::{AttrValue, Attribute, Color, PropPayload, PropValue, TextSpan};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::ratatui::widgets::Clear;
@@ -22,6 +22,7 @@ use crate::ui::components::{
     FeedsList, Footer, GSInputPopup, GSTablePopup, GlobalListener, LabelSpan, Lyric, MusicLibrary,
     Playlist, Progress, Source,
 };
+use crate::ui::model::rx_main_port::{PortRxMain, UserEvent};
 use crate::ui::model::{ConfigEditorLayout, Model, TermusicLayout};
 use crate::ui::utils::{
     draw_area_in_absolute, draw_area_in_relative, draw_area_top_right_absolute,
@@ -32,19 +33,21 @@ impl Model {
     pub fn init_app(
         tree: &Tree<String>,
         config: &SharedTuiSettings,
-    ) -> Application<Id, Msg, NoUserEvent> {
+        tx_to_main: UnboundedReceiver<Msg>,
+    ) -> Application<Id, Msg, UserEvent> {
         // Setup application
         // NOTE: NoUserEvent is a shorthand to tell tui-realm we're not going to use any custom user event
         // NOTE: the event listener is configured to use the default crossterm input listener and to raise a Tick event each second
         // which we will use to update the clock
 
-        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+        let mut app: Application<Id, Msg, UserEvent> = Application::init(
             EventListenerCfg::default()
                 .with_handle(Handle::current())
                 .async_crossterm_input_listener(Duration::ZERO, 10)
                 .poll_timeout(Duration::from_millis(10))
                 .async_tick(true)
-                .tick_interval(Duration::from_secs(1)),
+                .tick_interval(Duration::from_secs(1))
+                .add_async_port(Box::new(PortRxMain::new(tx_to_main)), Duration::ZERO, 10),
         );
 
         Self::mount_main(&mut app, config, tree).unwrap();
@@ -64,7 +67,7 @@ impl Model {
 
     /// Mount the Main components for the TUI
     fn mount_main(
-        app: &mut Application<Id, Msg, NoUserEvent>,
+        app: &mut Application<Id, Msg, UserEvent>,
         config: &SharedTuiSettings,
         tree: &Tree<String>,
     ) -> Result<()> {
@@ -309,7 +312,7 @@ impl Model {
     #[allow(clippy::too_many_lines)]
     fn view_layout_commons(
         f: &mut Frame<'_>,
-        app: &mut Application<Id, Msg, NoUserEvent>,
+        app: &mut Application<Id, Msg, UserEvent>,
         downloading_visible: bool,
     ) {
         // -- footer

@@ -30,7 +30,7 @@ use termusiclib::ids::{Id, IdConfigEditor, IdKey};
 use termusiclib::types::{ConfigEditorMsg, KFMsg, Msg};
 use tui_realm_stdlib::utils::get_block;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::event::{Key, KeyEvent, KeyModifiers, NoUserEvent};
+use tuirealm::event::{Key, KeyEvent, KeyModifiers};
 use tuirealm::ratatui::layout::Position as LayoutPosition;
 use tuirealm::ratatui::widgets::ListDirection;
 use tuirealm::{Component, Event, Frame, MockComponent, State, StateValue};
@@ -46,7 +46,7 @@ use tuirealm::ratatui::{
     widgets::{Block, List, ListItem, ListState, Paragraph},
 };
 
-use crate::ui::model::Model;
+use crate::ui::model::{Model, UserEvent};
 
 pub const INPUT_INVALID_STYLE: &str = "invalid-style";
 pub const INPUT_PLACEHOLDER: &str = "placeholder";
@@ -1271,9 +1271,9 @@ impl KEModifierSelect {
     }
 }
 
-impl Component<Msg, NoUserEvent> for KEModifierSelect {
+impl Component<Msg, UserEvent> for KEModifierSelect {
     #[allow(clippy::too_many_lines)]
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         let config = self.config.clone();
         let keys = &config.read().settings.keys;
         let cmd_result = match ev {
@@ -1432,8 +1432,8 @@ impl ConfigGlobalQuit {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalQuit {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalQuit {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1457,8 +1457,8 @@ impl ConfigGlobalLeft {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalLeft {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalLeft {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1482,8 +1482,8 @@ impl ConfigGlobalDown {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalDown {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalDown {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1506,8 +1506,8 @@ impl ConfigGlobalRight {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalRight {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalRight {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1530,8 +1530,8 @@ impl ConfigGlobalUp {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalUp {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalUp {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1555,8 +1555,8 @@ impl ConfigGlobalGotoTop {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalGotoTop {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalGotoTop {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1580,8 +1580,8 @@ impl ConfigGlobalGotoBottom {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalGotoBottom {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalGotoBottom {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1609,8 +1609,8 @@ impl ConfigGlobalPlayerTogglePause {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalPlayerTogglePause {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalPlayerTogglePause {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1634,8 +1634,8 @@ impl ConfigGlobalPlayerNext {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalPlayerNext {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalPlayerNext {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1661,8 +1661,8 @@ impl ConfigGlobalPlayerPrevious {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalPlayerPrevious {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalPlayerPrevious {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1686,8 +1686,8 @@ impl ConfigGlobalHelp {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalHelp {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalHelp {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1710,8 +1710,8 @@ impl ConfigGlobalVolumeUp {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalVolumeUp {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalVolumeUp {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1735,8 +1735,8 @@ impl ConfigGlobalVolumeDown {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalVolumeDown {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalVolumeDown {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1764,8 +1764,8 @@ impl ConfigGlobalPlayerSeekForward {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalPlayerSeekForward {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalPlayerSeekForward {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1793,8 +1793,8 @@ impl ConfigGlobalPlayerSeekBackward {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalPlayerSeekBackward {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalPlayerSeekBackward {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1820,8 +1820,8 @@ impl ConfigGlobalPlayerSpeedUp {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalPlayerSpeedUp {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalPlayerSpeedUp {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1849,8 +1849,8 @@ impl ConfigGlobalPlayerSpeedDown {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalPlayerSpeedDown {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalPlayerSpeedDown {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1878,8 +1878,8 @@ impl ConfigGlobalLyricAdjustForward {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalLyricAdjustForward {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalLyricAdjustForward {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1907,8 +1907,8 @@ impl ConfigGlobalLyricAdjustBackward {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalLyricAdjustBackward {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalLyricAdjustBackward {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1932,8 +1932,8 @@ impl ConfigGlobalLyricCycle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalLyricCycle {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalLyricCycle {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1959,8 +1959,8 @@ impl ConfigGlobalLayoutTreeview {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalLayoutTreeview {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalLayoutTreeview {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1986,8 +1986,8 @@ impl ConfigGlobalLayoutDatabase {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalLayoutDatabase {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalLayoutDatabase {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2015,8 +2015,8 @@ impl ConfigGlobalPlayerToggleGapless {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalPlayerToggleGapless {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalPlayerToggleGapless {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2040,8 +2040,8 @@ impl ConfigLibraryDelete {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryDelete {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryDelete {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2065,8 +2065,8 @@ impl ConfigLibraryLoadDir {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryLoadDir {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryLoadDir {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2090,8 +2090,8 @@ impl ConfigLibraryYank {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryYank {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryYank {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2115,8 +2115,8 @@ impl ConfigLibraryPaste {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryPaste {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryPaste {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2140,8 +2140,8 @@ impl ConfigLibrarySearch {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibrarySearch {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibrarySearch {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2167,8 +2167,8 @@ impl ConfigLibrarySearchYoutube {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibrarySearchYoutube {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibrarySearchYoutube {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2192,8 +2192,8 @@ impl ConfigLibraryTagEditor {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryTagEditor {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryTagEditor {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2217,8 +2217,8 @@ impl ConfigPlaylistDelete {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistDelete {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistDelete {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2242,8 +2242,8 @@ impl ConfigPlaylistDeleteAll {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistDeleteAll {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistDeleteAll {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2267,8 +2267,8 @@ impl ConfigPlaylistShuffle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistShuffle {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistShuffle {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2292,8 +2292,8 @@ impl ConfigPlaylistModeCycle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistModeCycle {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistModeCycle {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2319,8 +2319,8 @@ impl ConfigPlaylistPlaySelected {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistPlaySelected {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistPlaySelected {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2344,8 +2344,8 @@ impl ConfigPlaylistSearch {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistSearch {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistSearch {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2369,8 +2369,8 @@ impl ConfigPlaylistSwapDown {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistSwapDown {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistSwapDown {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2394,8 +2394,8 @@ impl ConfigPlaylistSwapUp {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistSwapUp {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistSwapUp {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2419,8 +2419,8 @@ impl ConfigDatabaseAddAll {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigDatabaseAddAll {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigDatabaseAddAll {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2446,8 +2446,8 @@ impl ConfigDatabaseAddSelected {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigDatabaseAddSelected {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigDatabaseAddSelected {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2471,8 +2471,8 @@ impl ConfigGlobalConfig {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalConfig {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalConfig {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2500,8 +2500,8 @@ impl ConfigPlaylistAddRandomAlbum {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistAddRandomAlbum {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistAddRandomAlbum {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2529,8 +2529,8 @@ impl ConfigPlaylistAddRandomTracks {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistAddRandomTracks {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistAddRandomTracks {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2554,8 +2554,8 @@ impl ConfigLibrarySwitchRoot {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibrarySwitchRoot {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibrarySwitchRoot {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2579,8 +2579,8 @@ impl ConfigLibraryAddRoot {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryAddRoot {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryAddRoot {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2604,8 +2604,8 @@ impl ConfigLibraryRemoveRoot {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryRemoveRoot {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryRemoveRoot {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2629,8 +2629,8 @@ impl ConfigGlobalSavePlaylist {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalSavePlaylist {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalSavePlaylist {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2656,8 +2656,8 @@ impl ConfigGlobalLayoutPodcast {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalLayoutPodcast {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalLayoutPodcast {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2681,8 +2681,8 @@ impl ConfigGlobalXywhMoveLeft {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalXywhMoveLeft {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalXywhMoveLeft {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2708,8 +2708,8 @@ impl ConfigGlobalXywhMoveRight {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalXywhMoveRight {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalXywhMoveRight {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2732,8 +2732,8 @@ impl ConfigGlobalXywhMoveUp {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalXywhMoveUp {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalXywhMoveUp {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2756,8 +2756,8 @@ impl ConfigGlobalXywhMoveDown {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalXywhMoveDown {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalXywhMoveDown {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2781,8 +2781,8 @@ impl ConfigGlobalXywhZoomIn {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalXywhZoomIn {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalXywhZoomIn {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2805,8 +2805,8 @@ impl ConfigGlobalXywhZoomOut {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalXywhZoomOut {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalXywhZoomOut {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2830,8 +2830,8 @@ impl ConfigGlobalXywhHide {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigGlobalXywhHide {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigGlobalXywhHide {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2855,8 +2855,8 @@ impl ConfigPodcastMarkPlayed {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastMarkPlayed {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastMarkPlayed {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2882,8 +2882,8 @@ impl ConfigPodcastMarkAllPlayed {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastMarkAllPlayed {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastMarkAllPlayed {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2907,8 +2907,8 @@ impl ConfigPodcastEpDownload {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastEpDownload {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastEpDownload {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2934,8 +2934,8 @@ impl ConfigPodcastEpDeleteFile {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastEpDeleteFile {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastEpDeleteFile {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2959,8 +2959,8 @@ impl ConfigPodcastDeleteFeed {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastDeleteFeed {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastDeleteFeed {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -2988,8 +2988,8 @@ impl ConfigPodcastDeleteAllFeeds {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastDeleteAllFeeds {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastDeleteAllFeeds {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -3015,8 +3015,8 @@ impl ConfigPodcastSearchAddFeed {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastSearchAddFeed {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastSearchAddFeed {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -3040,8 +3040,8 @@ impl ConfigPodcastRefreshFeed {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastRefreshFeed {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastRefreshFeed {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -3069,8 +3069,8 @@ impl ConfigPodcastRefreshAllFeeds {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPodcastRefreshAllFeeds {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPodcastRefreshAllFeeds {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }

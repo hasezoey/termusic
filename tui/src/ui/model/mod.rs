@@ -25,9 +25,8 @@ use termusiclib::types::{Msg, YoutubeOptions};
 use termusiclib::ueberzug::UeInstance;
 use termusiclib::utils::get_app_config_path;
 use termusiclib::xywh;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tui_realm_treeview::Tree;
-use tuirealm::event::NoUserEvent;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 
 use super::components::TETrack;
@@ -35,9 +34,11 @@ use super::tui_cmd::TuiCmd;
 use crate::ui::Application;
 use crate::CombinedSettings;
 pub use download_tracker::DownloadTracker;
+pub use rx_main_port::UserEvent;
 
 mod download_tracker;
 mod playlist;
+mod rx_main_port;
 mod update;
 mod view;
 mod youtube_options;
@@ -289,11 +290,11 @@ pub struct Model {
     /// Tells whether to redraw interface
     pub redraw: bool,
     last_redraw: Instant,
-    pub app: Application<Id, Msg, NoUserEvent>,
+    pub app: Application<Id, Msg, UserEvent>,
     /// Used to draw to terminal
     pub terminal: TerminalBridge<CrosstermTerminalAdapter>,
     pub tx_to_main: TxToMain,
-    pub rx_to_main: UnboundedReceiver<Msg>,
+    // pub rx_to_main: UnboundedReceiver<Msg>,
     /// Sender for Player Commands
     pub cmd_to_server_tx: UnboundedSender<TuiCmd>,
 
@@ -402,7 +403,7 @@ impl Model {
         ));
         let (tx_to_main, rx_to_main) = unbounded_channel();
 
-        let app = Self::init_app(&tree, &config_tui);
+        let app = Self::init_app(&tree, &config_tui, rx_to_main);
 
         // This line is required, in order to show the playing message for the first track
         // playlist.set_current_track_index(0);
@@ -467,7 +468,7 @@ impl Model {
             },
             taskpool,
             tx_to_main,
-            rx_to_main,
+            // rx_to_main,
             download_tracker,
             current_track_lyric: None,
             playback: Playback::new(),

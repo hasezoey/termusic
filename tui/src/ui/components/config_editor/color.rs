@@ -30,14 +30,14 @@ use termusiclib::ids::{Id, IdConfigEditor};
 use termusiclib::types::{ConfigEditorMsg, Msg};
 use tui_realm_stdlib::{Input, Label, Select, Table};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::event::{Key, KeyEvent, KeyModifiers, NoUserEvent};
+use tuirealm::event::{Key, KeyEvent, KeyModifiers};
 use tuirealm::props::{
     Alignment, BorderType, Borders, Color, InputType, Style, TableBuilder, TextModifiers, TextSpan,
 };
 use tuirealm::ratatui::style::Modifier;
 use tuirealm::{AttrValue, Attribute, Component, Event, MockComponent, State, StateValue};
 
-use crate::ui::model::Model;
+use crate::ui::model::{Model, UserEvent};
 
 const COLOR_LIST: [ColorTermusic; 19] = [
     ColorTermusic::Reset,
@@ -102,8 +102,8 @@ impl CEThemeSelectTable {
     }
 }
 
-impl Component<Msg, NoUserEvent> for CEThemeSelectTable {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for CEThemeSelectTable {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         let config = self.config.clone();
         let keys = &config.read().settings.keys;
         let cmd_result = match ev {
@@ -303,8 +303,8 @@ impl CEColorSelect {
     }
 }
 
-impl Component<Msg, NoUserEvent> for CEColorSelect {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for CEColorSelect {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         let config = self.config.clone();
         let keys = &config.read().settings.keys;
         let cmd_result = match ev {
@@ -377,8 +377,8 @@ impl Default for ConfigLibraryTitle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryTitle {
-    fn on(&mut self, _ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryTitle {
+    fn on(&mut self, _ev: Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
@@ -404,8 +404,8 @@ impl ConfigLibraryForeground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryForeground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryForeground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -431,8 +431,8 @@ impl ConfigLibraryBackground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryBackground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryBackground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -458,8 +458,8 @@ impl ConfigLibraryBorder {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryBorder {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryBorder {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -485,8 +485,8 @@ impl ConfigLibraryHighlight {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryHighlight {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryHighlight {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -506,8 +506,8 @@ impl Default for ConfigPlaylistTitle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistTitle {
-    fn on(&mut self, _ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistTitle {
+    fn on(&mut self, _ev: Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
@@ -533,8 +533,8 @@ impl ConfigPlaylistForeground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistForeground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistForeground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -560,8 +560,8 @@ impl ConfigPlaylistBackground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistBackground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistBackground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -587,8 +587,8 @@ impl ConfigPlaylistBorder {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistBorder {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistBorder {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -614,8 +614,8 @@ impl ConfigPlaylistHighlight {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistHighlight {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistHighlight {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -635,8 +635,8 @@ impl Default for ConfigProgressTitle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigProgressTitle {
-    fn on(&mut self, _ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigProgressTitle {
+    fn on(&mut self, _ev: Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
@@ -662,8 +662,8 @@ impl ConfigProgressForeground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigProgressForeground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigProgressForeground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -689,8 +689,8 @@ impl ConfigProgressBackground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigProgressBackground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigProgressBackground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -716,8 +716,8 @@ impl ConfigProgressBorder {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigProgressBorder {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigProgressBorder {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -737,8 +737,8 @@ impl Default for ConfigLyricTitle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLyricTitle {
-    fn on(&mut self, _ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLyricTitle {
+    fn on(&mut self, _ev: Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
@@ -764,8 +764,8 @@ impl ConfigLyricForeground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLyricForeground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLyricForeground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -791,8 +791,8 @@ impl ConfigLyricBackground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLyricBackground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLyricBackground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -818,8 +818,8 @@ impl ConfigLyricBorder {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLyricBorder {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLyricBorder {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -916,8 +916,8 @@ impl ConfigInputHighlight {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigInputHighlight {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigInputHighlight {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         let config = self.config.clone();
         let keys = &config.read().settings.keys;
         match ev {
@@ -1029,8 +1029,8 @@ impl ConfigLibraryHighlightSymbol {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigLibraryHighlightSymbol {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigLibraryHighlightSymbol {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1052,8 +1052,8 @@ impl ConfigPlaylistHighlightSymbol {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigPlaylistHighlightSymbol {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigPlaylistHighlightSymbol {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1075,8 +1075,8 @@ impl ConfigCurrentlyPlayingTrackSymbol {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigCurrentlyPlayingTrackSymbol {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigCurrentlyPlayingTrackSymbol {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1096,8 +1096,8 @@ impl Default for ConfigImportantPopupTitle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigImportantPopupTitle {
-    fn on(&mut self, _ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigImportantPopupTitle {
+    fn on(&mut self, _ev: Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
@@ -1123,8 +1123,8 @@ impl ConfigImportantPopupForeground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigImportantPopupForeground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigImportantPopupForeground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1150,8 +1150,8 @@ impl ConfigImportantPopupBackground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigImportantPopupBackground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigImportantPopupBackground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1177,8 +1177,8 @@ impl ConfigImportantPopupBorder {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigImportantPopupBorder {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigImportantPopupBorder {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1198,8 +1198,8 @@ impl Default for ConfigFallbackTitle {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigFallbackTitle {
-    fn on(&mut self, _ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigFallbackTitle {
+    fn on(&mut self, _ev: Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
@@ -1225,8 +1225,8 @@ impl ConfigFallbackForeground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigFallbackForeground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigFallbackForeground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1252,8 +1252,8 @@ impl ConfigFallbackBackground {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigFallbackBackground {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigFallbackBackground {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1279,8 +1279,8 @@ impl ConfigFallbackBorder {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigFallbackBorder {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigFallbackBorder {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }
@@ -1306,8 +1306,8 @@ impl ConfigFallbackHighlight {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ConfigFallbackHighlight {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, UserEvent> for ConfigFallbackHighlight {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.component.on(ev)
     }
 }

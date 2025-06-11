@@ -1,4 +1,4 @@
-use crate::ui::model::TermusicLayout;
+use crate::ui::model::{TermusicLayout, UserEvent};
 use crate::ui::tui_cmd::{PlaylistCmd, TuiCmd};
 use crate::ui::Model;
 use anyhow::{anyhow, bail, Context as _, Result};
@@ -33,7 +33,7 @@ use tuirealm::{
     event::KeyModifiers,
 };
 use tuirealm::{
-    event::{Key, KeyEvent, NoUserEvent},
+    event::{Key, KeyEvent},
     AttrValue, Attribute, Component, Event, MockComponent, State, StateValue,
 };
 
@@ -78,9 +78,9 @@ impl Playlist {
     }
 }
 
-impl Component<Msg, NoUserEvent> for Playlist {
+impl Component<Msg, UserEvent> for Playlist {
     #[allow(clippy::too_many_lines)]
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         let config = self.config.clone();
         let keys = &config.read().settings.keys;
         let cmd_result = match ev {
