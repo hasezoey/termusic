@@ -85,7 +85,6 @@ impl UI {
 
         // Main loop
         while !self.model.quit {
-            self.model.update_outside_msg();
             if self.model.layout != TermusicLayout::Podcast {
                 self.model.lyric_update();
             }
