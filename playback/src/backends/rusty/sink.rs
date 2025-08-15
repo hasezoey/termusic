@@ -12,6 +12,7 @@ use rodio::{Source, queue};
 use super::PlayerInternalCmd;
 use super::source::SourceExt as _;
 use super::source::{SampleType, SpecificType};
+use crate::backends::rusty::source::queue_wrap::QueueOutputWrap;
 use crate::PlayerCmd;
 
 /// Handle to an device that outputs sounds.
@@ -82,6 +83,16 @@ impl Sink {
         pcmd_tx: crate::PlayerCmdSender,
     ) -> Self {
         let (sink, queue_rx) = Self::new_idle(picmd_tx, pcmd_tx);
+        let queue_rx = QueueOutputWrap::new(queue_rx);
+        let arc_clone = queue_rx.test.clone();
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(Duration::from_secs(5));
+
+            loop {
+                interval.tick().await;
+                debug!("Reference count: {:#?}", (Arc::strong_count(&arc_clone), Arc::weak_count(&arc_clone)));
+            }
+        });
         mixer.add(queue_rx);
         sink
     }
