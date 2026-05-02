@@ -5859,8 +5859,9 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
 name = "tui-realm-stdlib"
-version = "4.0.0"
-source = "git+https://github.com/hasezoey/tui-realm.git?rev=9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec#9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d2fd2ea3ea191daa2e22773d7dee9c7d6a33efc95204afcd319c60da57ee13b"
 dependencies = [
  "textwrap",
  "tuirealm",
@@ -5869,8 +5870,9 @@ dependencies = [
 
 [[package]]
 name = "tuirealm"
-version = "4.0.0"
-source = "git+https://github.com/hasezoey/tui-realm.git?rev=9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec#9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f7d70af0dff16882cfeb423cbec374055e941ac25b205a31f9f5607e831ebac"
 dependencies = [
  "async-trait",
  "bitflags 2.11.0",
@@ -5888,7 +5890,7 @@ dependencies = [
 [[package]]
 name = "tuirealm-orx-tree"
 version = "0.3.0"
-source = "git+https://github.com/hasezoey/tuirealm-orx-tree.git?rev=340e05b2564d78ef139261d0d2896517142169ec#340e05b2564d78ef139261d0d2896517142169ec"
+source = "git+https://github.com/hasezoey/tuirealm-orx-tree.git?rev=9e491367169efca4025cfc973dad9b739e8f0548#9e491367169efca4025cfc973dad9b739e8f0548"
 dependencies = [
  "orx-tree",
  "tui-realm-stdlib",
@@ -5897,8 +5899,9 @@ dependencies = [
 
 [[package]]
 name = "tuirealm_derive"
-version = "4.0.0"
-source = "git+https://github.com/hasezoey/tui-realm.git?rev=9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec#9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a464b5edbcbec3ed4890ddb9efabb3b236f5c921a58a1f9d390854ee20bc5c2b"
 dependencies = [
  "proc-macro2",
  "quote",

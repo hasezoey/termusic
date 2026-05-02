@@ -110,9 +110,9 @@ prost = "0.14.3"
 tonic = "0.14.5"
 tonic-prost = "0.14.5"
 tonic-prost-build = "0.14.5"
-tuirealm = { git = "https://github.com/hasezoey/tui-realm.git", rev = "9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec", features = ["async-ports"] }
-tui-realm-stdlib = { git = "https://github.com/hasezoey/tui-realm.git", rev = "9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec" }
-tuirealm-orx-tree = { git = "https://github.com/hasezoey/tuirealm-orx-tree.git", rev = "340e05b2564d78ef139261d0d2896517142169ec" }
+tuirealm = { version = "4.1.0", features = ["async-ports"] }
+tui-realm-stdlib = { version = "4.1.0" }
+tuirealm-orx-tree = { git = "https://github.com/hasezoey/tuirealm-orx-tree.git", rev = "9e491367169efca4025cfc973dad9b739e8f0548" }
 unicode-segmentation = "1.12"
 # ratatui is very specific with its versions
 unicode-width = "^0.2.2"
@@ -126,10 +126,6 @@ alphanumeric-sort = "1.5.5"
 # for less dependencies, keep in sync with the version ratatui uses
 lru = "0.16"
 either = "1.15"
-
-# HACK: temporary for tuirealm 4.0.0 upgrade and dependencies directly depending on 4.0.0 instead of git
-[patch.crates-io]
-tuirealm = { git = "https://github.com/hasezoey/tui-realm.git", rev = "9c3f325efac7cb0e1dd9c1db3cd91e4dfaa8dbec" }
 
 [profile.release]
 lto = true
