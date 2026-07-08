@@ -5381,6 +5381,7 @@ dependencies = [
  "discord-rich-presence",
  "glib",
  "gstreamer",
+ "image",
  "libmpv-sirno",
  "log",
  "parking_lot",

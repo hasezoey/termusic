@@ -59,16 +59,21 @@ impl Mpris {
     pub fn set_track(&mut self, track: &Track) {
         let cover_art = match track.get_picture() {
             Ok(v) => v.map(|v| {
+                let img = image::load_from_memory(v.data()).expect("Valid image");
+                let mut output = Vec::new();
+                let encoder = image::codecs::jpeg::JpegEncoder::new(&mut output);
+                img.write_with_encoder(encoder).expect("Valid write");
                 format!(
                     "data:{};base64,{}",
-                    v.mime_type().map_or_else(
-                        || {
-                            error!("Unknown mimetype for picture of track {track:#?}");
-                            "application/octet-stream"
-                        },
-                        |v| v.as_str()
-                    ),
-                    base64::engine::general_purpose::STANDARD_NO_PAD.encode(v.data())
+                    "image/jpeg",
+                // v.mime_type().map_or_else(
+                //         || {
+                //             error!("Unknown mimetype for picture of track {track:#?}");
+                //             "application/octet-stream"
+                //         },
+                //         |v| v.as_str()
+                //     ),
+                    base64::engine::general_purpose::STANDARD_NO_PAD.encode(output)
                 )
             }),
             Err(err) => {
