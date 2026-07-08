@@ -179,7 +179,7 @@ impl UeInstance {
         }
     }
 
-    /// If ueberzug instance does not exist, create it. Otherwise take the existing one
+    /// If ueberzug instance does not exist, create it. Otherwise take the existing one.
     ///
     /// Do a [`Child::try_wait`] on the existing instance and return a error if the instance has exited
     fn try_wait_spawn<I, S>(&mut self, args: I) -> Result<Option<&mut Child>>
